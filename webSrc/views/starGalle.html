@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link rel="stylesheet" type="text/css" href="../../dll/css/mui.css"/>
+		<style type="text/css">
+			html {
+				overflow: hidden;
+				-ms-touch-action: none;
+				-ms-content-zooming: none;
+				font-size:9px;
+			}
+			body {
+				position: absolute;
+				margin: rem;
+				padding: rem;
+				background: #fff;
+				width: 100%;
+				height: 100%;
+			}
+			
+			#screen {
+				position: absolute;
+				left: 0;
+				top: 0;
+				width: 100%;
+				height: 100%;
+				background: #000;
+				perspective: 25rem;
+			}
+			
+			.cube {
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				width: 0;
+				height: 0;
+				margin: 0;
+				user-select: none;
+				transform-style: preserve-3d;
+				-webkit-transform-style: preserve-3d;
+			}
+			
+			.face {
+				position: absolute;
+				margin-left: -15rem;
+				margin-top: -10rem;
+				width: 30rem;
+				height: 20rem;
+				backface-visibility: hidden;
+				-webkit-backface-visibility: hidden;
+				transform-origin: 50% 50%;
+				-webkit-transform-origin: 50% 50%;
+				transition: outline 0.5s ease-in-out 0s;
+				cursor: pointer;
+			}
+			
+			.button {
+				position: absolute;
+				margin-left: -7.5rem;
+				margin-top: -5rem;
+				width: 15rem;
+				height: 10rem;
+			}
+			
+			.face:hover {
+				outline: rgba(255, 255, 255, 1) solid 0.5rem !important;
+			}
+			#cube img:nth-child(4){
+				opacity: 0;
+			}
+			
+			
+			.menu{
+				position: absolute;
+				top: 0;
+				left: 0;
+			}
+		</style>
+	</head>
+
+	<body>
+		<!-- 主界面不动、菜单移动 -->
+		<!-- 侧滑导航根容器 -->
+		<div class="mui-off-canvas-wrap  mui-slide-in">
+		  <!-- 菜单容器 -->
+		  <aside class="mui-off-canvas-left" id="offCanvasSide">
+		  	
+		  </aside>
+		  <!-- 主页面容器 -->
+		  <div class="mui-inner-wrap">
+		    <div id="screen">
+				<canvas id="canvas"></canvas>
+				<div id="cube" class='cube'>
+					<!-- cube images -->
+					<img id="1" src="../img/1.jpg" class='face' data-transform="translateZ(-20rem)" style="outline:none !important">
+					<img id="2" src="../img/2.jpg" class='face' data-transform="rotateY(90deg) translateZ(-20rem)">
+					<img id="3" src="../img/3.jpg"  class='face' data-transform="rotateY(-90deg) translateZ(-20rem)">
+					<img id="4" src="../img/4.jpg" class='face' data-transform="rotateY(180deg) translateZ(-20rem)">
+					<img id="5" src="../img/5.jpg" class='face' data-transform="rotateX(90deg) translateZ(-15rem)">
+					<img id="6" src="../img/6.jpg"  class='face' data-transform="rotateX(-90deg) translateZ(-15rem)">
+					<!-- bonus image -->
+					<img id="7" src="../img/7.jpg"  class='face' data-transform="rotateY(180deg) translateZ(15.25rem)" style="visibility:hidden">
+					<!-- buttons -->
+					<img src="../img/7.jpg" class='face button' alt="7" data-transform="translateY(-4rem) translateZ(-17rem) scale(0.5)">
+					<img src="../img/6.jpg" class='face button' alt="2" data-transform="translateX(-10rem) translateY(-4rem) translateZ(-17rem) scale(0.5)">
+					<img src="../img/3.jpg"  class='face button' alt="3" data-transform="translateX(10rem) translateY(-4rem) translateZ(-17rem) scale(0.5)">
+					<img src="../img/milkyWay.png" class='face button' alt="4" data-transform="translateY(4rem) translateZ(-17rem) scale(0.5)">
+					<img src="../img/5.jpg" class='face button' alt="5" data-transform="translateX(-10rem) translateY(4rem) translateZ(-17rem) scale(0.5)">
+					<img src="../img/6.jpg"  class='face button' alt="6" data-transform="translateX(10rem) translateY(4rem) translateZ(-17rem) scale(0.5)">
+				</div>
+				<span class="mui-icon mui-icon-bars menu" id="menu"></span>
+			</div>
+		    <div class="mui-off-canvas-backdrop"></div>
+		  </div>
+		</div>
+		<script src="../../dll/js/mui.js" type="text/javascript" charset="utf-8"></script>
+	</body>
+</html>

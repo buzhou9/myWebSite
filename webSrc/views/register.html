@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style type="text/css">
+			.register-view{
+				margin: 100px auto;
+				width: 300px;
+			}
+			.register-userName,
+			.register-password{
+				margin-bottom: 20px;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="register-view">
+			<div class="register-userName">
+				<label>用户名</label>
+				<input type="text" name="" id="userName" value="" />
+			</div>
+			<div class="register-password">
+				<label>密码</label>
+				<input type="password" name="" id="password" value="" />
+			</div>
+			<div class="register-btn">
+				<button><a href="login.html">登录</a></button>
+				<button id="register-sub">注册</button>
+			</div>
+		</div>
+		<script src="../../dll/js/mui.js" type="text/javascript" charset="utf-8"></script>
+		<script type="text/javascript">
+			document.getElementById('register-sub').onclick=function(){
+				var userName=document.getElementById('userName').value;
+				var password=document.getElementById('password').value;
+				var re=/\S/;
+				if(!re.test(userName)){
+					alert('用户名不能为空！');
+					return false;
+				}
+				if(!re.test(password)){
+					alert('密码不能为空！');
+					return false;
+				}
+				mui.ajax('/user/register',{
+					data:{
+						userName:userName,
+						password:password
+					},
+					dataType:'json',//服务器返回json格式数据
+					type:'post',//HTTP请求类型
+					success:function(data){
+						alert(data.message);
+					},
+					error:function(xhr,type,errorThrown){
+						
+					}
+				});
+			}
+		</script>
+	</body>
+</html>

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style type="text/css">
+			div,ul,li{
+				box-sizing: border-box;
+			}
+			.cont{
+				width: 500px;
+				height: 500px;
+				border: 1px solid black;
+				margin: 100px auto;
+			}
+			.left{
+				width: 70%;
+				height: 100%;
+				float: left;
+			}
+			.right{
+				width: 30%;
+				height: 100%;
+				float: left;
+				padding: 10px 5px;
+			}
+			.left .char-message{
+				height: 80%;
+			}
+			.char-input{
+				position: relative;
+				height: 20%;
+				padding-top: 10px;
+				padding-bottom: 30px;
+				border: 1px solid #AAAAAA;
+			}
+			.char-text{
+				display: block;
+				width: 100%;
+				height: 100%;
+				resize: none;
+				border: none;
+				outline-style: none;
+				box-sizing: border-box;
+				padding: 5px;
+				font-size: 17px;
+			}
+			.char-input .tools{
+				position: absolute;
+				bottom: 0;
+				left: 0;
+				width: 100%;
+				height: 30px;
+			}
+			.char-input .btn{
+				float: right;
+				height: 30px;
+				width: 60px;
+			}
+			.char-message{
+				border: 1px solid #AAAAAA;
+				background: rgba(135,206,250,0.2);
+				overflow: auto;
+			}
+			.message-cont{
+				width: 100%;
+				height: auto;
+				padding: 0 10px;
+				margin-bottom: 10px;
+			}
+			.message-cont p{
+				margin:10px 0;
+				color: blue;
+			}
+			.message-cont em{
+				font-size: 12px;
+			}
+			.user-list{
+				list-style: none;
+				margin: 0;
+				padding: 0;
+				border-top: 1px solid #6641E2;
+			}
+			.user-list li{
+				text-align: center;
+				padding:2px 10px;
+				border-bottom: 1px solid #6641E2;
+				color: darkcyan;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="cont">
+			<div class="left">
+				<div class="char-message" id="char-message">
+				</div>
+				<div class="char-input">
+					<textarea class="char-text" name="" rows="" cols="" id="char-input-text"></textarea>
+					<div class="tools">
+						<button class="btn" id="char-input-submit">发送</button>
+					</div>
+				</div>
+			</div>
+			<div class="right">
+				在线人员
+				<ul class="user-list" id="user-list">
+				</ul>
+			</div>
+		</div>
+		<script src="../../dll/js/mui.js" type="text/javascript" charset="utf-8"></script>
+		<script type="text/javascript">
+			window.onload=function(){
+				function getCookie(name){
+					var arr,reg=new RegExp("(^| )"+name+"=([^;]*)(;|$)");
+					if(arr=document.cookie.match(reg)){
+						return unescape(arr[2]);
+					}else{
+						return null;
+					}
+				}
+				var wsSwitch=false;
+				var ws=new WebSocket('ws://101.132.65.122:8083?'+getCookie('SESSION_ID'));
+				ws.onmessage = function(msg) {
+					var data=JSON.parse(msg.data);
+					if(data.result=='success'){
+						var myData=data.root;
+						if(myData.type==0){//系统消息
+							var userList=document.getElementById('user-list');
+							var str1='';
+							for(var i=0;i<myData.userList.length;i++){
+								str1+='<li>'+myData.userList[i].name+'</li>'
+							}
+							userList.innerHTML=str1;
+							var $charView=document.getElementById('char-message');
+							var createTime=new Date(myData.createTime);
+							var str='<div class="message-cont">'
+										+'<p class="message-user">系统消息<em></em></p>'
+										+'<div class="message-text">'
+											+myData.message
+										+'</div>'
+									+'</div>'
+							$charView.innerHTML=$charView.innerHTML+str;
+						}
+						if(myData.type==1){//用户消息
+							var $charView=document.getElementById('char-message');
+							var createTime=new Date(myData.createTime);
+							var str='<div class="message-cont">'
+										+'<p class="message-user">'+myData.loginUser.name+'<em></em></p>'
+										+'<div class="message-text">'
+											+myData.message
+										+'</div>'
+									+'</div>'
+							$charView.innerHTML=$charView.innerHTML+str;
+						}
+					}else{
+						alert(data.message);
+					}
+				};
+				ws.onopen=function(msg){
+					wsSwitch=true;
+				}
+				ws.onclose=function(e){
+					if(e.code==4002){
+						alert('你已经被踢下线了！');
+						window.history.back(-1);
+					}
+				}
+				var $btn=document.getElementById('char-input-submit');
+				$btn.onclick=function(){
+					if(wsSwitch==false){
+						return false;
+					}
+					var $text=document.getElementById('char-input-text');
+					var sendJson={
+						type:1,//广播所有人
+						message:$text.value
+					}
+					ws.send(JSON.stringify(sendJson));
+					$text.value='';
+				}
+			}
+		</script>
+	</body>
+</html>
