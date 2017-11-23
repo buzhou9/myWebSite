@@ -10,7 +10,7 @@
     "koa",
     "async"
   ],
-  "author": "Michael Liao",
+  "author": "Huang",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -24,10 +24,10 @@
     "koa-session-minimal": "3.0.4",
     "koa-static": "4.0.1",
     "mime": "1.3.4",
+    "moment": "^2.19.2",
     "mysql": "2.11.1",
     "sequelize": "3.24.1",
     "ws": "1.1.1"
   },
-  "devDependencies": {
-  }
+  "devDependencies": {}
 }

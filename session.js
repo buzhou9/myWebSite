@@ -9,7 +9,7 @@ module.exports = function () {
 		  host:config.host
 		})
 		let cookie = {
-		  maxAge:'', // cookie有效时长
+		  maxAge:0, // cookie有效时长
 		  expires: '',  // cookie失效时间
 		  path: '/', // 写cookie所在的路径
 		  domain: '', // 写cookie所在的域名
