@@ -54,6 +54,18 @@ const LoginRecord=sequelize.define('user_loginRecords',{
 },{
 	timestamps:false
 });
+//定义session数据库
+const sessionTable=sequelize.define('_mysql_session_store',{
+	expires:{
+		type:Sequelize.STRING
+	},
+	data:{
+		type:Sequelize.STRING
+	}
+},{
+	tableName:'_mysql_session_store',
+	timestamps:false
+});
 var fn_login = async (ctx, next) => {
 	let form={};
 	ctx.method=='GET'?form=ctx.query:form=ctx.request.body;
@@ -111,6 +123,78 @@ var fn_login = async (ctx, next) => {
 		ctx.response.body=JSON.stringify(backJson);
 	}
 };
+var fn_signOut = async (ctx,next) => {
+	let SESSION_ID = ctx.cookies.get('SESSION_ID');
+	if(SESSION_ID != undefined){
+		try{
+			let result=await sessionTable.findAll({
+				where:{
+					id:'SESSION_ID:'+SESSION_ID
+				}
+			});
+			if(result.length>0){
+				let expires = result[0].expires;//验证session是否过期
+				expires = new Date(expires/1);
+				var nowTime=new Date();
+				if(expires>nowTime){
+					try{
+						result[0].expires = (nowTime/1).toString();
+						await result[0].save();
+						let backJson={
+							result:"success",
+							message:"退出成功！",
+							state:3
+						}
+						ctx.cookies.set(
+					      'SESSION_ID',
+					      '',{
+					        	expires:new Date(2000,1,1),  // cookie失效时间
+					      }
+					   	);
+						ctx.response.body=JSON.stringify(backJson);
+					}catch(e){
+						console.log(e);
+						let backJson={
+							result:"failed",
+							message:"服务器修改失败！",
+							state:01
+						}
+						ctx.response.body=JSON.stringify(backJson);
+					}
+				}else{
+					let backJson={
+						result:"success",
+						message:"登录信息已过期！",
+						state:3
+					}
+					ctx.response.body=JSON.stringify(backJson);
+				}
+			}else{
+				let backJson={
+					result:"failed",
+					message:"无效session！",
+					state:2
+				}
+				ctx.response.body=JSON.stringify(backJson);
+			}
+		}catch(e){
+			console.log(e);
+			let backJson={
+				result:"failed",
+				message:"服务器查询失败！",
+				state:01
+			}
+			ctx.response.body=JSON.stringify(backJson);
+		}
+	}else{
+		let backJson={
+			result:"failed",
+			message:"无session！",
+			state:1
+		}
+		ctx.response.body=JSON.stringify(backJson);
+	}
+}
 var fn_register = async (ctx, next) => {
 	let form={};
 	ctx.method=='GET'?form=ctx.query:form=ctx.request.body;
@@ -198,6 +282,66 @@ var fn_searchAccount = async (ctx, next) => {
 		}
 	}
 };
+var fn_searchSession = async (ctx, next) => {
+	let m = await checkSession(ctx, next);
+	m==undefined?m={}:true;
+	if(m.result=='success'){
+		ctx.response.body=JSON.stringify(m);
+	}
+}
+var checkSession = async (ctx, next) =>{
+	let SESSION_ID = ctx.cookies.get('SESSION_ID');
+	if(SESSION_ID != undefined){
+		try{
+			let result=await sessionTable.findAll({
+				where:{
+					id:'SESSION_ID:'+SESSION_ID
+				}
+			});
+			if(result.length>0){
+				let expires = result[0].expires;//验证session是否过期
+				expires = new Date(expires/1);
+				var nowTime=new Date();
+				if(expires>nowTime){
+					return {
+						result:"success",
+						message:"登录信息有效！",
+						root:JSON.parse(result[0].data)
+					};
+				}else{
+					let backJson={
+						result:"failed",
+						message:"登录信息已过期！",
+						state:3
+					}
+					ctx.response.body=JSON.stringify(backJson);
+				}
+			}else{
+				let backJson={
+					result:"failed",
+					message:"无效session！",
+					state:2
+				}
+				ctx.response.body=JSON.stringify(backJson);
+			}
+		}catch(e){
+			console.log(e);
+			let backJson={
+				result:"failed",
+				message:"服务器查询失败！",
+				state:01
+			}
+			ctx.response.body=JSON.stringify(backJson);
+		}
+	}else{
+		let backJson={
+			result:"failed",
+			message:"无session！",
+			state:1
+		}
+		ctx.response.body=JSON.stringify(backJson);
+	}
+}
 var get_ip = function(req) {
 	    var ip = req.headers['x-real-ip'] || 
 	             req.headers['x-forwarded-for'] ||
@@ -213,5 +357,9 @@ module.exports = {
     'GET /server/user/register':fn_register,
     'POST /server/user/register':fn_register,
     'GET /server/user/searchAccount':fn_searchAccount,
-    'POST /server/user/searchAccount':fn_searchAccount
+    'POST /server/user/searchAccount':fn_searchAccount,
+    'GET /server/user/searchSession':fn_searchSession,
+    'POST /server/user/searchSession':fn_searchSession,
+    'GET /server/user/signOut':fn_signOut,
+    'POST /server/user/signOut':fn_signOut
 };
