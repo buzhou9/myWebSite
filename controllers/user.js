@@ -34,6 +34,15 @@ const User=sequelize.define('user_account',{
 	},
 	createData:{
 		type:Sequelize.DATE
+	},
+	sex:{
+		type:Sequelize.STRING
+	},
+	email:{
+		type:Sequelize.STRING
+	},
+	introduce:{
+		type:Sequelize.STRING
 	}
 },{
 	timestamps:false
@@ -95,7 +104,11 @@ var fn_login = async (ctx, next) => {
 						result:"success",
 						message:"登录成功！"
 					};
-					ctx.session = JsonP.dataValues;//设置session
+					ctx.session = {
+						id:JsonP.dataValues.id,
+						username:JsonP.dataValues.username,
+						password:JsonP.dataValues.password
+					};//设置session
 					ctx.response.body =JSON.stringify(backJson);
 				}catch(e){
 					console.log(e);
@@ -342,6 +355,122 @@ var checkSession = async (ctx, next) =>{
 		ctx.response.body=JSON.stringify(backJson);
 	}
 }
+var fn_modifyUserInfo = async (ctx,next) => {
+	let m = await checkSession(ctx, next);
+	m==undefined?m={}:true;
+	if(m.result=='success'){
+		let form={};
+		ctx.method=='GET'?form=ctx.query:form=ctx.request.body;
+		if(form.id!='' && form.id!=undefined){
+			try{
+				let result =await User.findAll({
+					where:{
+						id:form.id
+					}
+				});
+				if(result[0]){
+					form.nickname?result[0].nickname = form.nickname:false;
+					form.age?result[0].age=form.age:false;
+					if(form.sex==1){//男是1
+						result[0].sex='男';
+					}
+					if(form.sex==2){//女是2
+						result[0].sex='女';
+					}
+					form.email?result[0].email=form.email:false;
+					form.introduce?result[0].introduce=form.introduce:false;
+					try{
+						let modifyResult = await result[0].save();
+						let backJson={
+							result:"success",
+							message:"修改成功！",
+							root:modifyResult.dataValues
+						}
+						ctx.session = modifyResult.dataValues;//设置session
+						ctx.response.body=JSON.stringify(backJson);
+					}catch(e){
+						console.log(e);
+						ctx.response.body=JSON.stringify({
+							result:"failed",
+							message:"更新数据库失败！"
+						});
+					}
+				}else{
+					ctx.response.body=JSON.stringify({
+						result:"failed",
+						message:"查询数据库失败！"
+					});
+				}
+			}catch(e){
+				console.log(e);
+				ctx.response.body=JSON.stringify({
+					result:"failed",
+					message:"查询数据库失败！"
+				});
+			}
+		}else{
+			ctx.response.body=JSON.stringify({
+				result:"failed",
+				message:"缺少参数！"
+			});
+		}
+	}else{
+		let backJson={
+			result:"failed",
+			message:"服务器异常！",
+			root:m
+		}
+		ctx.response.body=JSON.stringify(backJson);
+	}
+}
+var fn_findUserInfo = async (ctx,next) => {
+	let m = await checkSession(ctx, next);
+	m==undefined?m={}:true;
+	if(m.result=='success'){
+		let form={};
+		ctx.method=='GET'?form=ctx.query:form=ctx.request.body;
+		if(form.id!='' && form.id!=undefined){
+			try{
+				let result =await User.findAll({
+					where:{
+						id:form.id
+					}
+				});
+				if(result[0]){
+					let backJson={
+						result:"success",
+						message:"查询成功！",
+						root:result[0].dataValues
+					}
+					ctx.response.body=JSON.stringify(backJson);
+				}else{
+					ctx.response.body=JSON.stringify({
+						result:"failed",
+						message:"数据不存在！"
+					});
+				}
+			}catch(e){
+				console.log(e);
+				ctx.response.body=JSON.stringify({
+					result:"failed",
+					message:"查询数据库失败！"
+				});
+			}
+		}else{
+			ctx.response.body=JSON.stringify({
+				result:"failed",
+				message:"缺少参数！"
+			});
+		}
+	}else{
+		let backJson={
+			result:"failed",
+			message:"服务器异常！",
+			root:m
+		}
+		ctx.response.body=JSON.stringify(backJson);
+	}
+}
 var get_ip = function(req) {
 	    var ip = req.headers['x-real-ip'] || 
 	             req.headers['x-forwarded-for'] ||
@@ -361,5 +490,9 @@ module.exports = {
     'GET /server/user/searchSession':fn_searchSession,
     'POST /server/user/searchSession':fn_searchSession,
     'GET /server/user/signOut':fn_signOut,
-    'POST /server/user/signOut':fn_signOut
+    'POST /server/user/signOut':fn_signOut,
+    'GET /server/user/modifyUserInfo':fn_modifyUserInfo,
+    'POST /server/user/modifyUserInfo':fn_modifyUserInfo,
+    'GET /server/user/findUserInfo':fn_findUserInfo,
+    'POST /server/user/findUserInfo':fn_findUserInfo
 };

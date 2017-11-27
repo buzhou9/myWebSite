@@ -16,6 +16,10 @@ app.use( async (ctx,next) => {
 	var urlStr='/webRoot/';
 	var webRoot=path.resolve('webRoot');
 	if(!pathname.startsWith('/server/')){
+		if(pathname=='/index.html' || pathname=='/'){
+			pathname='/build/views/index.html';
+			ctx.redirect('/build/views/index.html');
+		}
 		var filepath=path.join(webRoot,pathname);
 		ctx.response.type = mime.lookup(pathname);
 		ctx.response.body = fs.createReadStream(filepath);
